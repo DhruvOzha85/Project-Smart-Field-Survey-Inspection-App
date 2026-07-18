@@ -67,7 +67,7 @@ export default function Dashboard() {
               <Text style={styles.priorityText}>High</Text>
             </View>
           </View>
-          <Text style={styles.clientName}>Client: John Doe</Text>
+          <Text style={styles.clientName}>Client: Ritesh</Text>
           <Text style={styles.surveyDate}>Today, 10:30 AM</Text>
           <View style={styles.statusContainer}>
             <Ionicons name="checkmark-circle" size={16} color="#16A34A" />
