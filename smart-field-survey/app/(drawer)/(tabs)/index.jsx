@@ -2,9 +2,11 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "expo-router";
 
 export default function Dashboard() {
   const router = useRouter();
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -15,8 +17,15 @@ export default function Dashboard() {
             <Text style={styles.welcomeText}>Smart Field Survey</Text>
             <Text style={styles.appName}></Text>
           </View>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>DO</Text>
+          
+          <View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
+            <Pressable onPress={() => navigation.openDrawer()}>
+              <Ionicons name="menu" size={32} color="#0F172A" />
+            </Pressable>
+            
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>DO</Text>
+            </View>
           </View>
         </View>
 
