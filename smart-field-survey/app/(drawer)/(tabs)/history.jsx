@@ -4,9 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const initialSurveys = [
-  { id: "SRV-001", siteName: "Alpha Farm", client: "John Doe", priority: "High", date: "2023-10-12", status: "Completed", notes: "All good" },
-  { id: "SRV-002", siteName: "Beta Factory", client: "Jane Smith", priority: "Medium", date: "2023-10-15", status: "Pending", notes: "Needs review" },
-  { id: "SRV-003", siteName: "Gamma Warehouse", client: "Bob Jones", priority: "Low", date: "2023-10-18", status: "In Progress", notes: "Started inspection" },
+  { id: "SRV-001", siteName: "Alpha Farm", client: "John Doe", priority: "High", date: "2023-10-12", status: "Completed", notes: "Inspection completed, everything looks secure." },
+  { id: "SRV-002", siteName: "Beta Factory", client: "Jane Smith", priority: "Medium", date: "2023-10-15", status: "Pending", notes: "Awaiting final clearance from the manager." },
+  { id: "SRV-003", siteName: "Gamma Warehouse", client: "Bob Jones", priority: "Low", date: "2023-10-18", status: "In Progress", notes: "Currently surveying the perimeter." },
 ];
 
 export default function HistoryScreen() {
@@ -28,7 +28,7 @@ export default function HistoryScreen() {
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: () => {
           setSurveys(surveys.filter(s => s.id !== id));
-          setSelectedSurvey(null);
+          setSelectedSurvey(null); // Close modal if open
       }}
     ]);
   };
@@ -149,7 +149,7 @@ export default function HistoryScreen() {
 
                 <View style={styles.modalActions}>
                   <Pressable style={[styles.modalBtn, styles.editBtn]} onPress={() => {
-                    Alert.alert("Edit", "Survey edit mode opened (Mock).");
+                    Alert.alert("Edit", "Survey edit mode opened.");
                     setSelectedSurvey(null);
                   }}>
                     <Ionicons name="pencil" size={20} color="white" />
