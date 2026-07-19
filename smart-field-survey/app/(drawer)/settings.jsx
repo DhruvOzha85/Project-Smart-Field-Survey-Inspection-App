@@ -9,59 +9,68 @@ export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(false);
   const [autoSync, setAutoSync] = useState(true);
 
+  const theme = {
+    background: darkMode ? "#0F172A" : "#F8FAFC",
+    card: darkMode ? "#1E293B" : "white",
+    text: darkMode ? "#F1F5F9" : "#0F172A",
+    textSecondary: darkMode ? "#94A3B8" : "#475569",
+    border: darkMode ? "#334155" : "#E2E8F0",
+    divider: darkMode ? "#334155" : "#F1F5F9",
+  };
+
   const renderSettingRow = (icon, title, value, onValueChange) => (
     <View style={styles.settingRow}>
       <View style={styles.settingInfo}>
-        <Ionicons name={icon} size={24} color="#64748B" />
-        <Text style={styles.settingTitle}>{title}</Text>
+        <Ionicons name={icon} size={24} color={theme.textSecondary} />
+        <Text style={[styles.settingTitle, { color: theme.text }]}>{title}</Text>
       </View>
       <Switch 
         value={value} 
         onValueChange={onValueChange} 
-        trackColor={{ false: "#E2E8F0", true: "#93C5FD" }}
-        thumbColor={value ? "#2563EB" : "#F8FAFC"}
+        trackColor={{ false: darkMode ? "#475569" : "#E2E8F0", true: "#93C5FD" }}
+        thumbColor={value ? "#2563EB" : (darkMode ? "#CBD5E1" : "#F8FAFC")}
       />
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         
         <View style={styles.header}>
           <Ionicons name="settings" size={40} color="#2563EB" />
-          <Text style={styles.title}>Settings</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Notifications</Text>
-        <View style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Notifications</Text>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           {renderSettingRow("notifications-outline", "Push Notifications", pushNotifications, setPushNotifications)}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
           {renderSettingRow("mail-outline", "Email Notifications", emailNotifications, setEmailNotifications)}
         </View>
 
-        <Text style={styles.sectionTitle}>Preferences</Text>
-        <View style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Preferences</Text>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           {renderSettingRow("moon-outline", "Dark Mode", darkMode, setDarkMode)}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
           {renderSettingRow("sync-circle-outline", "Auto-Sync Surveys", autoSync, setAutoSync)}
         </View>
 
-        <Text style={styles.sectionTitle}>About</Text>
-        <View style={styles.card}>
+        <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>About</Text>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <Pressable style={styles.linkRow}>
-            <Text style={styles.linkText}>Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+            <Text style={[styles.linkText, { color: theme.text }]}>Privacy Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
           </Pressable>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
           <Pressable style={styles.linkRow}>
-            <Text style={styles.linkText}>Terms of Service</Text>
-            <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+            <Text style={[styles.linkText, { color: theme.text }]}>Terms of Service</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
           </Pressable>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
           <View style={styles.versionRow}>
-            <Text style={styles.linkText}>App Version</Text>
-            <Text style={styles.versionText}>v1.0.0</Text>
+            <Text style={[styles.linkText, { color: theme.text }]}>App Version</Text>
+            <Text style={[styles.versionText, { color: theme.textSecondary }]}>v1.0.0</Text>
           </View>
         </View>
         
@@ -73,7 +82,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
     padding: 20,
   },
   header: {
@@ -84,22 +92,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0F172A",
     marginTop: 10,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#475569",
     marginBottom: 10,
     marginLeft: 4,
   },
   card: {
-    backgroundColor: "white",
     borderRadius: 16,
     marginBottom: 25,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
     overflow: "hidden",
   },
   settingRow: {
@@ -115,12 +119,10 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    color: "#0F172A",
     fontWeight: "500",
   },
   divider: {
     height: 1,
-    backgroundColor: "#F1F5F9",
   },
   linkRow: {
     flexDirection: "row",
@@ -130,7 +132,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 16,
-    color: "#0F172A",
     fontWeight: "500",
   },
   versionRow: {
@@ -141,7 +142,6 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 16,
-    color: "#94A3B8",
     fontWeight: "600",
   },
 });
