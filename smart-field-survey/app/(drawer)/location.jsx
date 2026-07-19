@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator, Platform } from "react-native";
 import * as Location from "expo-location";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MapView, { Marker } from "react-native-maps";
+import useStore from "../../store/useStore";
 
 export default function LocationScreen() {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { darkMode, updateSurveyDraft } = useStore();
 
   const fetchLocation = async () => {
     setLoading(true);
@@ -25,6 +28,13 @@ export default function LocationScreen() {
         accuracy: Location.Accuracy.Balanced,
       });
       setLocation(currentLocation);
+      
+      // Auto-tag the current survey draft with the location
+      updateSurveyDraft({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
+
     } catch (error) {
       setErrorMsg("Failed to get location. Make sure GPS is enabled.");
     } finally {
@@ -45,39 +55,71 @@ export default function LocationScreen() {
     }
   };
 
+  const theme = {
+    background: darkMode ? "#0F172A" : "#F8FAFC",
+    card: darkMode ? "#1E293B" : "white",
+    text: darkMode ? "#F1F5F9" : "#0F172A",
+    textSecondary: darkMode ? "#94A3B8" : "#64748B",
+    border: darkMode ? "#334155" : "#F1F5F9",
+    primary: "#4F46E5",
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="location" size={40} color="#2563EB" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.primary, shadowColor: theme.primary }]}>
+        <Ionicons name="navigate-circle" size={40} color="white" />
         <Text style={styles.title}>Current Location</Text>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
         {loading ? (
           <View style={styles.centerBox}>
-            <ActivityIndicator size="large" color="#2563EB" />
-            <Text style={styles.statusText}>Fetching Location...</Text>
+            <ActivityIndicator size="large" color={theme.primary} />
+            <Text style={[styles.statusText, { color: theme.textSecondary }]}>Fetching Location...</Text>
           </View>
         ) : errorMsg ? (
           <View style={styles.centerBox}>
-            <Ionicons name="warning-outline" size={40} color="#EF4444" />
+            <Ionicons name="warning-outline" size={48} color="#EF4444" />
             <Text style={styles.errorText}>{errorMsg}</Text>
           </View>
         ) : location ? (
-          <View style={styles.locationDetails}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Latitude:</Text>
-              <Text style={styles.detailValue}>{location.coords.latitude.toFixed(5)}</Text>
-            </View>
-            
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Longitude:</Text>
-              <Text style={styles.detailValue}>{location.coords.longitude.toFixed(5)}</Text>
+          <View style={styles.locationContent}>
+            <View style={styles.mapContainer}>
+              <MapView 
+                style={styles.map}
+                initialRegion={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}
+              >
+                <Marker 
+                  coordinate={{
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                  }}
+                  title="You are here"
+                  pinColor={theme.primary}
+                />
+              </MapView>
             </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Accuracy:</Text>
-              <Text style={styles.detailValue}>± {location.coords.accuracy.toFixed(2)} meters</Text>
+            <View style={styles.locationDetails}>
+              <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
+                <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Latitude:</Text>
+                <Text style={[styles.detailValue, { color: theme.text }]}>{location.coords.latitude.toFixed(5)}</Text>
+              </View>
+              
+              <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
+                <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Longitude:</Text>
+                <Text style={[styles.detailValue, { color: theme.text }]}>{location.coords.longitude.toFixed(5)}</Text>
+              </View>
+
+              <View style={[styles.detailRow, { borderBottomColor: theme.border, borderBottomWidth: 0 }]}>
+                <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Accuracy:</Text>
+                <Text style={[styles.detailValue, { color: theme.text }]}>± {location.coords.accuracy.toFixed(2)} meters</Text>
+              </View>
             </View>
           </View>
         ) : null}
@@ -85,20 +127,27 @@ export default function LocationScreen() {
 
       <View style={styles.actionButtons}>
         <Pressable 
-          style={[styles.button, styles.refreshButton]} 
+          style={({ pressed }) => [
+            styles.button, 
+            { backgroundColor: theme.primary, opacity: pressed || loading ? 0.7 : 1 }
+          ]} 
           onPress={fetchLocation}
           disabled={loading}
         >
-          <Ionicons name="refresh" size={20} color="white" />
+          <Ionicons name="refresh" size={22} color="white" />
           <Text style={styles.buttonText}>Refresh Location</Text>
         </Pressable>
 
         <Pressable 
-          style={[styles.button, styles.copyButton, (!location || loading) && styles.disabledButton]} 
+          style={({ pressed }) => [
+            styles.button, 
+            (!location || loading) ? styles.disabledButton : { backgroundColor: "#10B981" },
+            { opacity: pressed ? 0.7 : 1 }
+          ]} 
           onPress={copyToClipboard}
           disabled={!location || loading}
         >
-          <Ionicons name="copy-outline" size={20} color="white" />
+          <Ionicons name="copy-outline" size={22} color="white" />
           <Text style={styles.buttonText}>Copy Coordinates</Text>
         </Pressable>
       </View>
@@ -109,91 +158,111 @@ export default function LocationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-    padding: 20,
   },
   header: {
     alignItems: "center",
-    marginTop: 20,
-    marginBottom: 30,
+    paddingVertical: 24,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 24,
+    ...Platform.select({
+      ios: { shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 8 }
+    })
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#0F172A",
-    marginTop: 10,
+    fontWeight: "800",
+    marginTop: 8,
+    color: "white",
   },
   card: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 20,
+    padding: 16,
     minHeight: 200,
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-    marginBottom: 30,
+    borderWidth: 1,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    flex: 1,
+    ...Platform.select({
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10 },
+      android: { elevation: 3 }
+    })
   },
   centerBox: {
     alignItems: "center",
   },
   statusText: {
-    marginTop: 12,
+    marginTop: 16,
     fontSize: 16,
-    color: "#64748B",
+    fontWeight: "500",
   },
   errorText: {
-    marginTop: 12,
+    marginTop: 16,
     fontSize: 16,
     color: "#EF4444",
     textAlign: "center",
+    fontWeight: "600",
+  },
+  locationContent: {
+    flex: 1,
+    gap: 16,
+  },
+  mapContainer: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: "hidden",
+    minHeight: 250,
+  },
+  map: {
+    width: "100%",
+    height: "100%",
   },
   locationDetails: {
-    gap: 16,
+    gap: 8,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-    paddingBottom: 8,
+    paddingBottom: 10,
+    paddingTop: 4,
   },
   detailLabel: {
     fontSize: 16,
-    color: "#64748B",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   detailValue: {
     fontSize: 18,
-    color: "#0F172A",
-    fontWeight: "bold",
+    fontWeight: "800",
   },
   actionButtons: {
     gap: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-  },
-  refreshButton: {
-    backgroundColor: "#2563EB",
-  },
-  copyButton: {
-    backgroundColor: "#10B981",
+    paddingVertical: 18,
+    borderRadius: 16,
+    gap: 10,
+    ...Platform.select({
+      ios: { shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6 },
+      android: { elevation: 4 }
+    })
   },
   disabledButton: {
     backgroundColor: "#94A3B8",
+    elevation: 0,
+    shadowOpacity: 0,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "800",
   },
 });

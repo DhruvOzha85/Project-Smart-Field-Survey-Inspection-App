@@ -1,13 +1,18 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, Switch, ScrollView, Pressable } from "react-native";
+import { View, Text, StyleSheet, Switch, ScrollView, Pressable, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import useStore from "../../store/useStore";
+import { useNavigation } from "@react-navigation/native";
+
 
 export default function SettingsScreen() {
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [autoSync, setAutoSync] = useState(true);
+  const { 
+    pushNotifications, setPushNotifications, 
+    emailNotifications, setEmailNotifications, 
+    darkMode, setDarkMode, 
+    autoSync, setAutoSync 
+  } = useStore();
+  const navigation = useNavigation();
 
   const theme = {
     background: darkMode ? "#0F172A" : "#F8FAFC",
@@ -38,6 +43,11 @@ export default function SettingsScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         
         <View style={styles.header}>
+          <Pressable
+            onPress={() => navigation.openDrawer()}
+            style={({ pressed }) => [styles.iconButton, { backgroundColor: theme.card, opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
+            <Ionicons name="menu" size={24} color={theme.text} />
+          </Pressable>
           <Ionicons name="settings" size={40} color="#2563EB" />
           <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
         </View>
@@ -58,7 +68,7 @@ export default function SettingsScreen() {
 
         <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>About</Text>
         <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Pressable style={styles.linkRow}>
+          <Pressable style={({ pressed }) => [styles.linkRow, { backgroundColor: pressed ? theme.card : "transparent", opacity: pressed ? 0.8 : 1 }]} >
             <Text style={[styles.linkText, { color: theme.text }]}>Privacy Policy</Text>
             <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
           </Pressable>
@@ -105,6 +115,11 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     borderWidth: 1,
     overflow: "hidden",
+    // backgroundColor will be set inline using theme.card
+    ...Platform.select({
+      ios: { shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6 },
+      android: { elevation: 4 }
+    })
   },
   settingRow: {
     flexDirection: "row",
@@ -129,6 +144,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
+    borderRadius: 12,
+    ...Platform.select({
+      ios: { shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4 },
+      android: { elevation: 2 }
+    })
   },
   linkText: {
     fontSize: 16,
